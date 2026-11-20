@@ -1,0 +1,40 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/debian
+{
+	"name": "vscode_pj_template",
+	"image": "mcr.microsoft.com/devcontainers/base:bookworm",
+
+	// Claude Codeの動作に必要な Node.js と、検証用の AWS CLI v2 / Python を追加
+	"features": {
+		"ghcr.io/devcontainers/features/node:1": {
+			"version": "lts"
+		},
+		"ghcr.io/devcontainers/features/aws-cli:1": {},
+		"ghcr.io/devcontainers/features/python:1": {
+			"version": "3.11"
+		}
+	},
+
+	// マウントしたボリュームの所有権変更と、Claude Code CLI のインストール
+	"postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/.claude /home/vscode/.aws && npm install -g @anthropic-ai/claude-code",
+
+	// 認証情報とセッション履歴の保存先を1つのディレクトリに集約
+	"containerEnv": {
+		"CLAUDE_CONFIG_DIR": "/home/vscode/.claude"
+	},
+
+	// セッション履歴（プロジェクト固有）と AWS 設定（全プロジェクト共有）を永続化
+	"mounts": [
+		"source=claude-code-config-${devcontainerId},target=/home/vscode/.claude,type=volume",
+		"source=aws-config,target=/home/vscode/.aws,type=volume"
+	],
+
+	// リビルド時にVSCode拡張機能もコンテナ内へ自動インストール
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"anthropic.claude-code"
+			]
+		}
+	}
+}
